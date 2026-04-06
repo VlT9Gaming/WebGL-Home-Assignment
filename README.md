@@ -1,73 +1,41 @@
-# React + TypeScript + Vite
+# 3D Furniture Preview Front End
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+React + TypeScript + Vite implementation of the proposal, with an architecture that is easy to wire to Firebase later.
 
-Currently, two official plugins are available:
+## What is included
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Public pages: home, catalog, product detail (with interactive 3D viewer), login
+- Role-gated admin route scaffold (`/admin`)
+- Service interfaces (`AuthService`, `ProductService`) to decouple UI from backend
+- Mock backend adapters so UI can run now without Firebase
+- React Three Fiber + Drei placeholder furniture mesh in the viewer
 
-## React Compiler
+## Project structure
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- `src/domain`: shared types and service contracts
+- `src/services/mock`: in-memory mock implementations and seed data
+- `src/services/serviceContainer.ts`: central service wiring point
+- `src/features/auth`: auth context and role guard
+- `src/components`: layout, product card, 3D viewer
+- `src/pages`: route-level pages
 
-## Expanding the ESLint configuration
+## Run
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```powershell
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## Demo accounts
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- Admin: `admin@furniture.demo`
+- User: `user@furniture.demo`
+- Password can be any 6+ chars in mock mode
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+## Firebase integration path
+
+1. Add Firebase config and SDK initialization.
+2. Create Firebase adapters that implement `AuthService` and `ProductService`.
+3. Replace mock services in `src/services/serviceContainer.ts` with Firebase services.
+4. Connect product CRUD to Firestore and model/image URLs to Firebase Storage.
+5. Enforce admin-only writes with Firebase Auth + Firestore security rules.
