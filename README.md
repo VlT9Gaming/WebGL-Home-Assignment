@@ -1,41 +1,117 @@
-# 3D Furniture Preview Front End
+# 3D Furniture Preview Web Application
 
-React + TypeScript + Vite implementation of the proposal, with an architecture that is easy to wire to Firebase later.
+## Proposal Overview
 
-## What is included
+A 3D web application designed for a furniture retail company to improve the online shopping experience by allowing customers to interact with furniture models in real time. Instead of relying only on static images, users can rotate, zoom, and inspect products from multiple angles before making a purchase. The application will also redirect users to the main e-commerce website to complete purchases. :contentReference[oaicite:0]{index=0}
 
-- Public pages: home, catalog, product detail (with interactive 3D viewer), login
-- Role-gated admin route scaffold (`/admin`)
-- Service interfaces (`AuthService`, `ProductService`) to decouple UI from backend
-- Mock backend adapters so UI can run now without Firebase
-- React Three Fiber + Drei placeholder furniture mesh in the viewer
+---
 
-## Project structure
+## Client Scenario / Problem
 
-- `src/domain`: shared types and service contracts
-- `src/services/mock`: in-memory mock implementations and seed data
-- `src/services/serviceContainer.ts`: central service wiring point
-- `src/features/auth`: auth context and role guard
-- `src/components`: layout, product card, 3D viewer
-- `src/pages`: route-level pages
+A furniture retail company wants to improve the online shopping experience by helping customers better visualise products before purchasing. Static images do not provide enough detail about the design, scale, or appearance of furniture.
 
-## Run
+To solve this issue, the company requires a 3D interactive web application where users can explore furniture models in a realistic environment. :contentReference[oaicite:1]{index=1}
 
-```powershell
-npm install
-npm run dev
-```
+---
 
-## Demo accounts
+## Target Audience
 
-- Admin: `admin@furniture.demo`
-- User: `user@furniture.demo`
-- Password can be any 6+ chars in mock mode
+- Online furniture shoppers
+- Interior designers
+- Customers who prefer visual and interactive product previews :contentReference[oaicite:2]{index=2}
 
-## Firebase integration path
+---
 
-1. Add Firebase config and SDK initialization.
-2. Create Firebase adapters that implement `AuthService` and `ProductService`.
-3. Replace mock services in `src/services/serviceContainer.ts` with Firebase services.
-4. Connect product CRUD to Firestore and model/image URLs to Firebase Storage.
-5. Enforce admin-only writes with Firebase Auth + Firestore security rules.
+## Functional Requirements
+
+- User authentication (Login / Register)
+- Browse a list of available furniture items
+- Select and load a 3D furniture model
+- Interact with the model (rotate, zoom, inspect)
+- Redirect to the main website purchase page
+- Admin users can add, edit, or delete furniture items
+- Responsive design for mobile and desktop devices :contentReference[oaicite:3]{index=3}
+
+---
+
+## 3D Features to be Implemented
+
+- Real-time rendering using React Three Fiber
+- Lighting and shadows for realistic presentation
+- Camera controls (orbit, zoom, pan)
+- Smooth animations (auto-rotation or user-triggered rotation)
+- Multiple viewpoints (front, side, top view)
+- Texture and material application for realism :contentReference[oaicite:4]{index=4}
+
+---
+
+## Data to be Stored in Firestore
+
+### Furniture Items
+
+- Name
+- Description
+- Price
+- 3D model file URL (GLTF / GLB)
+- Image preview
+- Purchase link (redirect URL)
+
+### User Data
+
+- Email
+- Role (Admin / User)
+
+### Optional Data
+
+- User preferences
+- Saved items / favourites :contentReference[oaicite:5]{index=5}
+
+---
+
+## Authentication & Role-Based Access Plan
+
+Firebase Authentication will be used with email and password login.
+
+### Users
+
+- Can view furniture items
+- Can interact with 3D models
+- Can access product purchase links
+
+### Admins
+
+- Can create, update, and delete furniture entries
+- Can manage product data in Firestore
+
+### Security
+
+Firestore security rules will ensure only authorised users can modify data. :contentReference[oaicite:6]{index=6}
+
+---
+
+## Technologies Used
+
+- React (Frontend Framework)
+- Vite (Build Tool)
+- React Three Fiber + Drei (3D Rendering)
+- Firebase Authentication (User Management)
+- Firestore Database (Data Storage)
+- Firebase Storage (3D Models & Images)
+- React Router (Navigation)
+- Tailwind CSS (Responsive UI Styling) :contentReference[oaicite:7]{index=7}
+
+---
+
+## Hosting Platform
+
+The application can be deployed using:
+
+- Firebase Hosting
+- Vercel
+- GitHub Pages :contentReference[oaicite:8]{index=8}
+
+---
+
+## Expected Outcome
+
+This project will provide customers with a more immersive and informative shopping experience, helping them make confident purchasing decisions while increasing engagement and potential sales for the furniture retailer.
