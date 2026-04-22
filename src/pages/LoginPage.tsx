@@ -13,8 +13,8 @@ export function LoginPage() {
   const location = useLocation()
   const state = (location.state as LocationState | null) ?? null
 
-  const [email, setEmail] = useState('user@furniture.demo')
-  const [password, setPassword] = useState('password123')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [mode, setMode] = useState<'login' | 'register'>('login')
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -52,7 +52,7 @@ export function LoginPage() {
   return (
     <section className="page stack narrow">
       <h2>{mode === 'login' ? 'Sign in' : 'Create account'}</h2>
-      <p>Use admin@furniture.demo for an admin role in this mock setup.</p>
+      <p>Use your Firebase Authentication email and password.</p>
 
       <form onSubmit={handleSubmit} className="stack form-panel">
         <label>

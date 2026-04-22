@@ -1,13 +1,18 @@
 import type { AuthService, ProductService } from '../domain/services'
-import { MockAuthService } from './mock/mockAuthService'
-import { MockProductService } from './mock/mockProductService'
+import { firebaseAuth, firestoreDb } from '../firebase-config'
+import { FirebaseAuthService } from './firebase/firebaseAuthService'
+import { FirebaseProductService } from './firebase/firebaseProductService'
 
-// Centralized service container keeps UI independent from backend provider details.
+const createServices = (): { auth: AuthService; products: ProductService } => {
+  return {
+    auth: new FirebaseAuthService(firebaseAuth, firestoreDb),
+    products: new FirebaseProductService(firestoreDb),
+  }
+}
+
+
 export const services: {
   auth: AuthService
   products: ProductService
-} = {
-  auth: new MockAuthService(),
-  products: new MockProductService(),
-}
+} = createServices()
 

@@ -30,7 +30,7 @@ export function AppLayout() {
               </button>
             </>
           ) : (
-            <small>Demo accounts: admin@furniture.demo / user@furniture.demo</small>
+            <small>Sign in with your Firebase account.</small>
           )}
         </div>
       </header>

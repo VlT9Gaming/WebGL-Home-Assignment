@@ -9,15 +9,15 @@
 **Depends on:** None
 
 ### Tasks
-- [ ] Move Firebase keys from `src/firebase-config.ts` into Vite env vars (`.env`) and keep only app initialization in code.
-- [ ] Add Firebase-backed adapters in `src/services/` that implement `AuthService` and `ProductService` from `src/domain/services.ts`.
-- [ ] Update `src/services/serviceContainer.ts` to use Firebase services instead of mock services.
-- [ ] Keep `src/services/mock/` as optional fallback for local demos/testing.
+- [x] Move Firebase keys from `src/firebase-config.ts` into Vite env vars (`.env`) and keep only app initialization in code.
+- [x] Add Firebase-backed adapters in `src/services/` that implement `AuthService` and `ProductService` from `src/domain/services.ts`.
+- [x] Update `src/services/serviceContainer.ts` to use Firebase services instead of mock services.
+- [x] Remove mock fallback and keep a Firebase-only service container.
 
 ### Acceptance criteria
-- [ ] App initializes Firebase from env vars.
-- [ ] `AuthContext` and product pages call `services.*` without direct Firebase SDK calls.
-- [ ] No hardcoded Firebase secrets remain in tracked source.
+- [x] App initializes Firebase from env vars.
+- [x] `AuthContext` and product pages call `services.*` without direct Firebase SDK calls.
+- [x] No hardcoded Firebase secrets remain in tracked source.
 
 ---
 
@@ -25,15 +25,15 @@
 **Depends on:** Phase 1
 
 ### Tasks
-- [ ] Convert `src/pages/AdminPage.tsx` from read-only table to full create/edit/delete UI.
-- [ ] Connect form actions to `createProduct`, `updateProduct`, and `deleteProduct` methods.
-- [ ] Add validation for required fields: `name`, `description`, `price`, `imageUrl`, `purchaseUrl`, `modelUrl`.
-- [ ] Add loading and error states for all admin operations.
+- [x] Convert `src/pages/AdminPage.tsx` from read-only table to full create/edit/delete UI.
+- [x] Connect form actions to `createProduct`, `updateProduct`, and `deleteProduct` methods.
+- [x] Add validation for required fields: `name`, `description`, `price`, `imageUrl`, `purchaseUrl`, `modelUrl`.
+- [x] Add loading and error states for all admin operations.
 
 ### Acceptance criteria
-- [ ] Admin can create a product and see it in list immediately.
-- [ ] Admin can edit and persist product fields.
-- [ ] Admin can delete a product with confirmation flow.
+- [x] Admin can create a product and see it in list immediately.
+- [x] Admin can edit and persist product fields.
+- [x] Admin can delete a product with confirmation flow.
 
 ---
 

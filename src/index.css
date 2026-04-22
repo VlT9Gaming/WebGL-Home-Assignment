@@ -201,6 +201,14 @@ input {
   font: inherit;
 }
 
+textarea {
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 0.45rem 0.6rem;
+  font: inherit;
+  resize: vertical;
+}
+
 table {
   border-collapse: collapse;
   width: 100%;
