@@ -23,20 +23,13 @@ const USERS_COLLECTION = 'users'
 
 interface UserRoleRecord {
   email: string
-  role: UserRole | UserRole[]
+  role: UserRole
   username?: string
 }
 
 const normalizeEmail = (email: string) => email.trim().toLowerCase()
 
-const normalizeRole = (role: UserRoleRecord['role'] | undefined): UserRole => {
-  if (Array.isArray(role)) {
-    return role.includes('admin') ? 'admin' : 'user'
-  }
-  return role === 'admin' ? 'admin' : 'user'
-}
-
-const toRoleRecord = (role: UserRole): UserRole[] => (role === 'admin' ? ['user', 'admin'] : ['user'])
+const normalizeRole = (role: UserRoleRecord['role'] | undefined): UserRole => (role === 'admin' ? 'admin' : 'user')
 
 const toUsername = (email: string) => email.split('@')[0] ?? ''
 
@@ -67,7 +60,7 @@ export class FirebaseAuthService implements AuthService {
       const role = normalizeRole(first.role)
       await setDoc(
         byUidRef,
-        { email: normalizedEmail, role: toRoleRecord(role), username: toUsername(normalizedEmail) },
+        { email: normalizedEmail, role, username: toUsername(normalizedEmail) },
         { merge: true },
       )
       return role
@@ -75,7 +68,7 @@ export class FirebaseAuthService implements AuthService {
 
     await setDoc(
       byUidRef,
-      { email: normalizedEmail, role: toRoleRecord('user'), username: toUsername(normalizedEmail) },
+      { email: normalizedEmail, role: 'user', username: toUsername(normalizedEmail) },
       { merge: true },
     )
     return 'user'
@@ -108,9 +101,9 @@ export class FirebaseAuthService implements AuthService {
       doc(this.db, USERS_COLLECTION, credential.user.uid),
       {
         email: normalizedEmail,
-        role: toRoleRecord('user'),
+        role: 'user',
         username: toUsername(normalizedEmail),
-      },
+      } satisfies UserRoleRecord,
       { merge: true },
     )
 
@@ -124,7 +117,7 @@ export class FirebaseAuthService implements AuthService {
     )
 
     if (!snapshot.empty) {
-      await Promise.all(snapshot.docs.map((entry) => updateDoc(entry.ref, { role: toRoleRecord(role) })))
+      await Promise.all(snapshot.docs.map((entry) => updateDoc(entry.ref, { role })))
       return
     }
 
@@ -134,9 +127,9 @@ export class FirebaseAuthService implements AuthService {
         doc(this.db, USERS_COLLECTION, current.uid),
         {
           email: normalizedEmail,
-          role: toRoleRecord(role),
+          role,
           username: toUsername(normalizedEmail),
-        },
+        } satisfies UserRoleRecord,
         { merge: true },
       )
     }
@@ -151,5 +144,3 @@ export class FirebaseAuthService implements AuthService {
     return this.toAuthUser(current)
   }
 }
-
-
