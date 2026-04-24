@@ -20,7 +20,6 @@ const firebaseConfig: FirebaseOptions = {
   appId: requireEnv('VITE_FIREBASE_APP_ID'),
 }
 
-export const isFirebaseConfigured = true
 export const firebaseApp = initializeApp(firebaseConfig)
 export const firebaseAuth = getAuth(firebaseApp)
 export const firestoreDb = getFirestore(firebaseApp)
