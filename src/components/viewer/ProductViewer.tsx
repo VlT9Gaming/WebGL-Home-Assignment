@@ -56,7 +56,7 @@ function CameraSync({ cameraPosition }: { cameraPosition: [number, number, numbe
 
 interface ModelErrorBoundaryProps {
   children: ReactNode
-  onError: (error: Error) => void
+    onError: (error: unknown) => void
   resetKey: string
 }
 
@@ -73,7 +73,7 @@ class ModelErrorBoundary extends Component<ModelErrorBoundaryProps, ModelErrorBo
     return { hasError: true }
   }
 
-  componentDidCatch(error: Error) {
+  componentDidCatch(error: unknown) {
     this.props.onError(error)
   }
 
@@ -92,23 +92,56 @@ class ModelErrorBoundary extends Component<ModelErrorBoundaryProps, ModelErrorBo
   }
 }
 
+const toLoadErrorMessage = (error: unknown): string => {
+  if (error && typeof error === 'object' && 'then' in error && typeof (error as { then?: unknown }).then === 'function') {
+    return ''
+  }
+  if (error instanceof Error && error.message) {
+    return error.message
+  }
+  if (error && typeof error === 'object' && 'message' in error) {
+    const maybeMessage = (error as { message?: unknown }).message
+    if (typeof maybeMessage === 'string' && maybeMessage.trim()) {
+      return maybeMessage
+    }
+  }
+  return 'Unable to load this 3D model.'
+}
+
 export function ProductViewer({ product, cameraPosition }: ProductViewerProps) {
   const modelUrl = product.modelUrl?.trim() ?? ''
   const hasModelUrl = Boolean(modelUrl)
-  const modelKey = `${product.id}:${modelUrl}`
-  const [failedModelKey, setFailedModelKey] = useState<string | null>(null)
-  const hasModelError = failedModelKey === modelKey
+  const modelIdentity = `${product.id}:${modelUrl}`
+  const [retryNonce, setRetryNonce] = useState(0)
+  const [failedModel, setFailedModel] = useState<{ identity: string; message: string } | null>(null)
+  const hasModelError = failedModel?.identity === modelIdentity
+
+  const handleModelError = (error: unknown) => {
+    const message = toLoadErrorMessage(error)
+    if (!message) {
+      return
+    }
+    useGLTF.clear(modelUrl)
+    setFailedModel({ identity: modelIdentity, message })
+  }
+
+  const retryModelLoad = () => {
+    useGLTF.clear(modelUrl)
+    setFailedModel(null)
+    setRetryNonce((value) => value + 1)
+  }
 
   const hintText = useMemo(() => {
     if (hasModelError) {
-      return 'Unable to load this 3D model. Showing placeholder mesh instead.'
+      const message = failedModel?.message || 'Unable to load this 3D model.'
+      return `${message} Showing placeholder mesh instead.`
     }
     if (!hasModelUrl) {
       return 'No model URL set for this product. Showing placeholder mesh.'
     }
 
     return 'Use the view controls to inspect the loaded model from front, side, and top angles.'
-  }, [hasModelError, hasModelUrl])
+  }, [failedModel?.message, hasModelError, hasModelUrl])
 
   return (
     <div className="viewer">
@@ -118,10 +151,7 @@ export function ProductViewer({ product, cameraPosition }: ProductViewerProps) {
         <CameraSync cameraPosition={cameraPosition} />
         <Stage shadows={{ type: 'contact', opacity: 0.2, blur: 2.2 }} intensity={0.6} adjustCamera={false}>
           {hasModelUrl && !hasModelError ? (
-            <ModelErrorBoundary
-              onError={() => setFailedModelKey(modelKey)}
-              resetKey={modelKey}
-            >
+            <ModelErrorBoundary onError={handleModelError} resetKey={`${modelIdentity}:${retryNonce}`}>
               <Suspense fallback={<ModelLoadingState />}>
                 <GltfModel modelUrl={modelUrl} />
               </Suspense>
@@ -133,6 +163,11 @@ export function ProductViewer({ product, cameraPosition }: ProductViewerProps) {
         <OrbitControls enablePan enableZoom minDistance={2.2} maxDistance={9} />
       </Canvas>
       <p className={hasModelError ? 'error-text' : 'hint'}>{hintText}</p>
+      {hasModelError ? (
+        <button type="button" className="ghost" onClick={retryModelLoad}>
+          Retry model load
+        </button>
+      ) : null}
     </div>
   )
 }
