@@ -25,15 +25,15 @@
 **Depends on:** Phase 1
 
 ### Tasks
-- [ ] Restrict `src/pages/AdminPage.tsx` to update-only actions for existing products.
-- [ ] Remove create/delete product actions from admin UI and service usage.
-- [ ] Add discount fields in `src/domain/types.ts` and map them in `src/services/firebase/firebaseProductService.ts`.
-- [ ] Add price + discount validation and update states in `src/pages/AdminPage.tsx`.
+- [x] Restrict `src/pages/AdminPage.tsx` to update-only actions for existing products.
+- [x] Remove create/delete product actions from admin UI and service usage.
+- [x] Add discount fields in `src/domain/types.ts` and map them in `src/services/firebase/firebaseProductService.ts`.
+- [x] Add price + discount validation and update states in `src/pages/AdminPage.tsx`.
 
 ### Acceptance criteria
-- [ ] Admin can update base price for an existing product and persist it.
-- [ ] Admin can apply and persist discount values for an existing product.
-- [ ] Admin cannot create or delete products from the implementation UI.
+- [x] Admin can update base price for an existing product and persist it.
+- [x] Admin can apply and persist discount values for an existing product.
+- [x] Admin cannot create or delete products from the implementation UI.
 
 ---
 

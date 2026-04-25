@@ -9,7 +9,7 @@ import {
   updateDoc,
 } from 'firebase/firestore'
 import type { ProductService } from '../../domain/services'
-import type { Product, ProductCameraPresets } from '../../domain/types'
+import type { DiscountType, Product, ProductCameraPresets } from '../../domain/types'
 
 const PRODUCTS_COLLECTION = 'products'
 
@@ -18,6 +18,8 @@ interface ProductDoc {
   name?: string
   description?: string
   price?: number
+  discountType?: DiscountType
+  discountValue?: number
   imageUrl?: string
   purchaseUrl?: string
   modelUrl?: string
@@ -30,6 +32,13 @@ const defaultCameraPresets: ProductCameraPresets = {
   front: [4, 2.2, 4],
   side: [5.5, 2, 0],
   top: [0.2, 6, 0.2],
+}
+
+const asDiscountType = (value: unknown): DiscountType => {
+  if (value === 'percent' || value === 'fixed') {
+    return value
+  }
+  return 'none'
 }
 
 const asTuple = (value: unknown, fallback: [number, number, number]): [number, number, number] => {
@@ -54,6 +63,8 @@ const mapDocToProduct = (id: string, raw: unknown): Product => {
     name: String(data.product_name ?? data.name ?? ''),
     description: String(data.description ?? ''),
     price: Number(data.price ?? 0),
+    discountType: asDiscountType(data.discountType),
+    discountValue: Number(data.discountValue ?? 0),
     imageUrl: String(data.imageUrl ?? ''),
     purchaseUrl: String(data.purchaseUrl ?? ''),
     modelUrl: data.modelUrl ? String(data.modelUrl) : '',
@@ -71,6 +82,8 @@ const mapProductInputToDoc = (input: Omit<Product, 'id'>): ProductDoc => ({
   product_name: input.name,
   description: input.description,
   price: input.price,
+  discountType: input.discountType,
+  discountValue: input.discountValue,
   imageUrl: input.imageUrl,
   purchaseUrl: input.purchaseUrl,
   modelUrl: input.modelUrl ?? '',

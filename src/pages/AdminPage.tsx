@@ -1,35 +1,53 @@
 import { useEffect, useMemo, useState } from 'react'
 import type { ChangeEvent, FormEvent } from 'react'
-import type { Product, ProductCameraPresets } from '../domain/types'
+import type { DiscountType, Product } from '../domain/types'
 import { services } from '../services/serviceContainer'
 
-const defaultCameraPresets: ProductCameraPresets = {
-  front: [4, 2.2, 4],
-  side: [5.5, 2, 0],
-  top: [0.2, 6, 0.2],
+interface PricingForm {
+  price: number
+  discountType: DiscountType
+  discountValue: number
 }
 
-const emptyForm = (): Omit<Product, 'id'> => ({
-  name: '',
-  description: '',
+const emptyForm = (): PricingForm => ({
   price: 0,
-  imageUrl: '',
-  purchaseUrl: '',
-  modelUrl: '',
-  materialHint: '',
-  dimensions: '',
-  cameraPresets: defaultCameraPresets,
+  discountType: 'none',
+  discountValue: 0,
 })
 
-const formatPrice = (price: number) => `$${price.toLocaleString()}`
+const formatPrice = (price: number) => `$${price.toLocaleString(undefined, { maximumFractionDigits: 2 })}`
 
-const validateProductForm = (product: Omit<Product, 'id'>): string | null => {
-  if (!product.name.trim()) return 'Name is required.'
-  if (!product.description.trim()) return 'Description is required.'
-  if (!Number.isFinite(product.price) || product.price < 0) return 'Price must be a non-negative number.'
-  if (!product.imageUrl.trim()) return 'Image URL is required.'
-  if (!product.purchaseUrl.trim()) return 'Purchase URL is required.'
-  if (!product.modelUrl?.trim()) return 'Model URL is required.'
+const getDiscountedPrice = (price: number, discountType: DiscountType, discountValue: number): number => {
+  if (discountType === 'percent') {
+    return Math.max(0, price - (price * discountValue) / 100)
+  }
+  if (discountType === 'fixed') {
+    return Math.max(0, price - discountValue)
+  }
+  return price
+}
+
+const getDiscountLabel = (discountType: DiscountType, discountValue: number): string => {
+  if (discountType === 'percent') {
+    return `${discountValue}% off`
+  }
+  if (discountType === 'fixed') {
+    return `${formatPrice(discountValue)} off`
+  }
+  return 'No discount'
+}
+
+const validatePricingForm = (form: PricingForm): string | null => {
+  if (!Number.isFinite(form.price) || form.price < 0) return 'Base price must be a non-negative number.'
+  if (!Number.isFinite(form.discountValue) || form.discountValue < 0) {
+    return 'Discount value must be a non-negative number.'
+  }
+  if (form.discountType === 'percent' && form.discountValue > 100) {
+    return 'Percent discount must be between 0 and 100.'
+  }
+  if (form.discountType === 'fixed' && form.discountValue > form.price) {
+    return 'Fixed discount cannot be greater than the base price.'
+  }
   return null
 }
 
@@ -37,14 +55,17 @@ export function AdminPage() {
   const [products, setProducts] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const [submitting, setSubmitting] = useState(false)
-  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [editingId, setEditingId] = useState<string | null>(null)
-  const [form, setForm] = useState<Omit<Product, 'id'>>(emptyForm)
+  const [form, setForm] = useState<PricingForm>(emptyForm)
   const [loadError, setLoadError] = useState<string | null>(null)
   const [formError, setFormError] = useState<string | null>(null)
   const [notice, setNotice] = useState<string | null>(null)
 
   const isEditing = useMemo(() => Boolean(editingId), [editingId])
+  const selectedProduct = useMemo(
+    () => products.find((product) => product.id === editingId) ?? null,
+    [editingId, products],
+  )
 
   const loadProducts = async () => {
     setLoading(true)
@@ -65,9 +86,9 @@ export function AdminPage() {
   }, [])
 
   const onFieldChange =
-    (field: keyof Omit<Product, 'id'>) =>
-    (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      const value = field === 'price' ? Number(event.target.value) : event.target.value
+    (field: keyof PricingForm) =>
+    (event: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const value = field === 'price' || field === 'discountValue' ? Number(event.target.value) : event.target.value
       setForm((current) => ({ ...current, [field]: value }))
     }
 
@@ -77,11 +98,16 @@ export function AdminPage() {
     setFormError(null)
   }
 
-  const handleCreateOrUpdate = async (event: FormEvent<HTMLFormElement>) => {
+  const handleUpdatePricing = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setNotice(null)
 
-    const validationError = validateProductForm(form)
+    if (!editingId) {
+      setFormError('Choose a product from the table before saving pricing changes.')
+      return
+    }
+
+    const validationError = validatePricingForm(form)
     if (validationError) {
       setFormError(validationError)
       return
@@ -91,24 +117,21 @@ export function AdminPage() {
     setFormError(null)
 
     try {
-      if (editingId) {
-        const updated = await services.products.updateProduct(editingId, form)
-        if (!updated) {
-          setFormError('Unable to find product to update.')
-          return
-        }
-
-        setProducts((current) => current.map((product) => (product.id === editingId ? updated : product)))
-        setNotice(`Updated ${updated.name}.`)
-      } else {
-        const created = await services.products.createProduct(form)
-        setProducts((current) => [created, ...current])
-        setNotice(`Created ${created.name}.`)
+      const updates: Partial<Omit<Product, 'id'>> = {
+        price: form.price,
+        discountType: form.discountType,
+        discountValue: form.discountType === 'none' ? 0 : form.discountValue,
+      }
+      const updated = await services.products.updateProduct(editingId, updates)
+      if (!updated) {
+        setFormError('Unable to find product to update.')
+        return
       }
 
-      resetForm()
+      setProducts((current) => current.map((product) => (product.id === editingId ? updated : product)))
+      setNotice(`Updated pricing for ${updated.name}.`)
     } catch {
-      setFormError('Unable to save product. Please try again.')
+      setFormError('Unable to save pricing changes. Please try again.')
     } finally {
       setSubmitting(false)
     }
@@ -118,44 +141,10 @@ export function AdminPage() {
     setNotice(null)
     setEditingId(product.id)
     setForm({
-      name: product.name,
-      description: product.description,
       price: product.price,
-      imageUrl: product.imageUrl,
-      purchaseUrl: product.purchaseUrl,
-      modelUrl: product.modelUrl ?? '',
-      materialHint: product.materialHint,
-      dimensions: product.dimensions,
-      cameraPresets: product.cameraPresets,
+      discountType: product.discountType,
+      discountValue: product.discountValue,
     })
-  }
-
-  const handleDelete = async (product: Product) => {
-    if (!window.confirm(`Delete ${product.name}? This cannot be undone.`)) {
-      return
-    }
-
-    setNotice(null)
-    setDeletingId(product.id)
-    setFormError(null)
-
-    try {
-      const deleted = await services.products.deleteProduct(product.id)
-      if (!deleted) {
-        setFormError('Unable to delete product. It may have already been removed.')
-        return
-      }
-
-      setProducts((current) => current.filter((entry) => entry.id !== product.id))
-      if (editingId === product.id) {
-        resetForm()
-      }
-      setNotice(`Deleted ${product.name}.`)
-    } catch {
-      setFormError('Unable to delete product. Please try again.')
-    } finally {
-      setDeletingId(null)
-    }
   }
 
   if (loading) {
@@ -164,26 +153,16 @@ export function AdminPage() {
 
   return (
     <section className="page stack">
-      <h2>Admin dashboard</h2>
-      <p>Manage catalog products with create, update, and delete actions.</p>
+      <h2>Admin pricing controls</h2>
+      <p>Update base price and discounts for existing products.</p>
 
       {loadError ? <p className="error-text">{loadError}</p> : null}
 
-      <form onSubmit={handleCreateOrUpdate} className="stack form-panel">
-        <h3>{isEditing ? 'Edit product' : 'Add product'}</h3>
+      <form onSubmit={handleUpdatePricing} className="stack form-panel">
+        <h3>{isEditing ? `Edit pricing: ${selectedProduct?.name ?? ''}` : 'Select a product to edit pricing'}</h3>
 
         <label>
-          Name
-          <input value={form.name} onChange={onFieldChange('name')} required />
-        </label>
-
-        <label>
-          Description
-          <textarea value={form.description} onChange={onFieldChange('description')} rows={3} required />
-        </label>
-
-        <label>
-          Price
+          Base price
           <input
             type="number"
             min={0}
@@ -191,40 +170,37 @@ export function AdminPage() {
             value={form.price}
             onChange={onFieldChange('price')}
             required
+            disabled={!isEditing}
           />
         </label>
 
         <label>
-          Image URL
-          <input type="url" value={form.imageUrl} onChange={onFieldChange('imageUrl')} required />
+          Discount type
+          <select value={form.discountType} onChange={onFieldChange('discountType')} disabled={!isEditing}>
+            <option value="none">No discount</option>
+            <option value="percent">Percent (%)</option>
+            <option value="fixed">Fixed amount ($)</option>
+          </select>
         </label>
 
         <label>
-          Purchase URL
-          <input type="url" value={form.purchaseUrl} onChange={onFieldChange('purchaseUrl')} required />
-        </label>
-
-        <label>
-          Model URL
-          <input type="url" value={form.modelUrl ?? ''} onChange={onFieldChange('modelUrl')} required />
-        </label>
-
-        <label>
-          Dimensions
-          <input value={form.dimensions} onChange={onFieldChange('dimensions')} placeholder="Optional" />
-        </label>
-
-        <label>
-          Material hint
-          <input value={form.materialHint} onChange={onFieldChange('materialHint')} placeholder="Optional" />
+          Discount value
+          <input
+            type="number"
+            min={0}
+            step="0.01"
+            value={form.discountValue}
+            onChange={onFieldChange('discountValue')}
+            disabled={!isEditing || form.discountType === 'none'}
+          />
         </label>
 
         {formError ? <p className="error-text">{formError}</p> : null}
         {notice ? <p className="hint">{notice}</p> : null}
 
         <div className="row">
-          <button type="submit" disabled={submitting}>
-            {submitting ? 'Saving...' : isEditing ? 'Save changes' : 'Create product'}
+          <button type="submit" disabled={submitting || !isEditing}>
+            {submitting ? 'Saving...' : 'Save pricing'}
           </button>
           {isEditing ? (
             <button type="button" className="ghost" onClick={resetForm} disabled={submitting}>
@@ -239,9 +215,9 @@ export function AdminPage() {
           <thead>
             <tr>
               <th>Name</th>
-              <th>Price</th>
-              <th>Model URL</th>
-              <th>Purchase URL</th>
+              <th>Base price</th>
+              <th>Discount</th>
+              <th>Final price</th>
               <th>Actions</th>
             </tr>
           </thead>
@@ -250,21 +226,12 @@ export function AdminPage() {
               <tr key={product.id}>
                 <td>{product.name}</td>
                 <td>{formatPrice(product.price)}</td>
-                <td>{product.modelUrl ? 'Connected' : 'Missing'}</td>
-                <td>{product.purchaseUrl}</td>
+                <td>{getDiscountLabel(product.discountType, product.discountValue)}</td>
+                <td>{formatPrice(getDiscountedPrice(product.price, product.discountType, product.discountValue))}</td>
                 <td>
                   <div className="row">
                     <button type="button" className="ghost" onClick={() => handleEdit(product)}>
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        void handleDelete(product)
-                      }}
-                      disabled={deletingId === product.id}
-                    >
-                      {deletingId === product.id ? 'Deleting...' : 'Delete'}
+                      Edit pricing
                     </button>
                   </div>
                 </td>

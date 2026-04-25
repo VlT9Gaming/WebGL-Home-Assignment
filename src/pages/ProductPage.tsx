@@ -9,12 +9,11 @@ type CameraView = 'front' | 'side' | 'top'
 export function ProductPage() {
   const { productId } = useParams<{ productId: string }>()
   const [product, setProduct] = useState<Product | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [loading, setLoading] = useState(() => Boolean(productId))
   const [cameraView, setCameraView] = useState<CameraView>('front')
 
   useEffect(() => {
     if (!productId) {
-      setLoading(false)
       return
     }
 
@@ -39,6 +38,14 @@ export function ProductPage() {
     )
   }
 
+  const discountedPrice =
+    product.discountType === 'percent'
+      ? Math.max(0, product.price - (product.price * product.discountValue) / 100)
+      : product.discountType === 'fixed'
+        ? Math.max(0, product.price - product.discountValue)
+        : product.price
+  const hasDiscount = product.discountType !== 'none' && product.discountValue > 0
+
   return (
     <section className="page stack">
       <div className="row split">
@@ -46,7 +53,8 @@ export function ProductPage() {
           <h2>{product.name}</h2>
           <p>{product.description}</p>
           <p>
-            <strong>${product.price.toLocaleString()}</strong> - {product.materialHint}
+            <strong>${discountedPrice.toLocaleString()}</strong>
+            {hasDiscount ? <span> (was ${product.price.toLocaleString()})</span> : null} - {product.materialHint}
           </p>
           <p>{product.dimensions}</p>
         </div>

@@ -1,4 +1,5 @@
 export type UserRole = 'user' | 'admin'
+export type DiscountType = 'none' | 'percent' | 'fixed'
 
 export interface AuthUser {
   id: string
@@ -17,6 +18,8 @@ export interface Product {
   name: string
   description: string
   price: number
+  discountType: DiscountType
+  discountValue: number
   imageUrl: string
   purchaseUrl: string
   modelUrl?: string

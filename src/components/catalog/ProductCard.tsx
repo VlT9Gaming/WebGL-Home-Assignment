@@ -8,6 +8,13 @@ interface ProductCardProps {
 
 export function ProductCard({ product }: ProductCardProps) {
   const imageSrc = product.imageUrl.trim() || heroImage
+  const discountedPrice =
+    product.discountType === 'percent'
+      ? Math.max(0, product.price - (product.price * product.discountValue) / 100)
+      : product.discountType === 'fixed'
+        ? Math.max(0, product.price - product.discountValue)
+        : product.price
+  const hasDiscount = product.discountType !== 'none' && product.discountValue > 0
 
   return (
     <article className="card">
@@ -16,7 +23,14 @@ export function ProductCard({ product }: ProductCardProps) {
         <h3>{product.name}</h3>
         <p>{product.description}</p>
         <p>
-          <strong>${product.price.toLocaleString()}</strong>
+          {hasDiscount ? (
+            <>
+              <strong>${discountedPrice.toLocaleString()}</strong>{' '}
+              <span className="hint">(was ${product.price.toLocaleString()})</span>
+            </>
+          ) : (
+            <strong>${product.price.toLocaleString()}</strong>
+          )}
         </p>
       </div>
       <div className="row">
