@@ -41,9 +41,9 @@
 **Depends on:** Phase 2
 
 ### Tasks
-- [ ] Update `src/components/viewer/ProductViewer.tsx` to load GLTF/GLB from `product.modelUrl`.
-- [ ] Keep `PlaceholderFurniture` as fallback when model URL is missing or invalid.
-- [ ] Add model loading and error UI states.
+- [x] Update `src/components/viewer/ProductViewer.tsx` to load GLTF/GLB from `product.modelUrl`.
+- [x] Keep `PlaceholderFurniture` as fallback when model URL is missing or invalid.
+- [x] Add model loading and error UI states.
 - [ ] Verify camera presets from `src/pages/ProductPage.tsx` still work.
 
 ### Acceptance criteria

@@ -23,7 +23,7 @@ const USERS_COLLECTION = 'users'
 
 interface UserRoleRecord {
   email: string
-  role: UserRole
+    role: UserRole
   username?: string
 }
 

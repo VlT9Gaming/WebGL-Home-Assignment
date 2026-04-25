@@ -1,6 +1,6 @@
-import { OrbitControls, Stage } from '@react-three/drei'
-import { Canvas } from '@react-three/fiber'
-import { useMemo } from 'react'
+import { Html, OrbitControls, Stage, useGLTF } from '@react-three/drei'
+import { Canvas, useThree } from '@react-three/fiber'
+import { Component, Suspense, useEffect, useMemo, useState, type ReactNode } from 'react'
 import type { Product } from '../../domain/types'
 
 interface ProductViewerProps {
@@ -27,23 +27,112 @@ function PlaceholderFurniture() {
   )
 }
 
+function GltfModel({ modelUrl }: { modelUrl: string }) {
+  const { scene } = useGLTF(modelUrl)
+  const clonedScene = useMemo(() => scene.clone(true), [scene])
+
+  return <primitive object={clonedScene} />
+}
+
+function ModelLoadingState() {
+  return (
+    <Html center>
+      <div className="viewer-status">Loading 3D model...</div>
+    </Html>
+  )
+}
+
+function CameraSync({ cameraPosition }: { cameraPosition: [number, number, number] }) {
+  const { camera } = useThree()
+
+  useEffect(() => {
+    camera.position.set(cameraPosition[0], cameraPosition[1], cameraPosition[2])
+    camera.lookAt(0, 0.5, 0)
+    camera.updateProjectionMatrix()
+  }, [camera, cameraPosition])
+
+  return null
+}
+
+interface ModelErrorBoundaryProps {
+  children: ReactNode
+  onError: (error: Error) => void
+  resetKey: string
+}
+
+interface ModelErrorBoundaryState {
+  hasError: boolean
+}
+
+class ModelErrorBoundary extends Component<ModelErrorBoundaryProps, ModelErrorBoundaryState> {
+  state: ModelErrorBoundaryState = {
+    hasError: false,
+  }
+
+  static getDerivedStateFromError(): ModelErrorBoundaryState {
+    return { hasError: true }
+  }
+
+  componentDidCatch(error: Error) {
+    this.props.onError(error)
+  }
+
+  componentDidUpdate(prevProps: ModelErrorBoundaryProps) {
+    if (prevProps.resetKey !== this.props.resetKey && this.state.hasError) {
+      this.setState({ hasError: false })
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return null
+    }
+
+    return this.props.children
+  }
+}
+
 export function ProductViewer({ product, cameraPosition }: ProductViewerProps) {
-  const key = useMemo(() => `${product.id}-${cameraPosition.join(':')}`, [cameraPosition, product.id])
+  const modelUrl = product.modelUrl?.trim() ?? ''
+  const hasModelUrl = Boolean(modelUrl)
+  const modelKey = `${product.id}:${modelUrl}`
+  const [failedModelKey, setFailedModelKey] = useState<string | null>(null)
+  const hasModelError = failedModelKey === modelKey
+
+  const hintText = useMemo(() => {
+    if (hasModelError) {
+      return 'Unable to load this 3D model. Showing placeholder mesh instead.'
+    }
+    if (!hasModelUrl) {
+      return 'No model URL set for this product. Showing placeholder mesh.'
+    }
+
+    return 'Use the view controls to inspect the loaded model from front, side, and top angles.'
+  }, [hasModelError, hasModelUrl])
 
   return (
     <div className="viewer">
-      <Canvas shadows camera={{ position: cameraPosition, fov: 42 }} key={key}>
+      <Canvas shadows camera={{ position: cameraPosition, fov: 42 }}>
         <color attach="background" args={['#f8fafc']} />
         <ambientLight intensity={0.4} />
+        <CameraSync cameraPosition={cameraPosition} />
         <Stage shadows={{ type: 'contact', opacity: 0.2, blur: 2.2 }} intensity={0.6} adjustCamera={false}>
-          <PlaceholderFurniture />
+          {hasModelUrl && !hasModelError ? (
+            <ModelErrorBoundary
+              onError={() => setFailedModelKey(modelKey)}
+              resetKey={modelKey}
+            >
+              <Suspense fallback={<ModelLoadingState />}>
+                <GltfModel modelUrl={modelUrl} />
+              </Suspense>
+            </ModelErrorBoundary>
+          ) : (
+            <PlaceholderFurniture />
+          )}
         </Stage>
         <OrbitControls enablePan enableZoom minDistance={2.2} maxDistance={9} />
       </Canvas>
-      <p className="hint">
-        Placeholder mesh is active. Swap in a GLTF loader tied to <code>product.modelUrl</code> once
-        Firebase Storage is connected.
-      </p>
+      <p className={hasModelError ? 'error-text' : 'hint'}>{hintText}</p>
     </div>
   )
 }

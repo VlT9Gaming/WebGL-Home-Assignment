@@ -1,14 +1,17 @@
 import { Link } from 'react-router-dom'
 import type { Product } from '../../domain/types'
+import heroImage from '../../assets/hero.png'
 
 interface ProductCardProps {
   product: Product
 }
 
 export function ProductCard({ product }: ProductCardProps) {
+  const imageSrc = product.imageUrl.trim() || heroImage
+
   return (
     <article className="card">
-      <img src={product.imageUrl} alt={product.name} />
+      <img src={imageSrc} alt={product.name} />
       <div className="stack">
         <h3>{product.name}</h3>
         <p>{product.description}</p>
