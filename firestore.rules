@@ -1,0 +1,71 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function currentUserDoc() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid));
+    }
+
+    function isAdmin() {
+      return isSignedIn()
+        && currentUserDoc().exists()
+        && currentUserDoc().data.role == 'admin';
+    }
+
+    function isValidDiscountType(discountType) {
+      return discountType in ['none', 'percent', 'fixed'];
+    }
+
+    function isValidPricingDocument() {
+      return request.resource.data.price is number
+        && request.resource.data.price >= 0
+        && request.resource.data.discountValue is number
+        && request.resource.data.discountValue >= 0
+        && isValidDiscountType(request.resource.data.discountType)
+        && (
+          (request.resource.data.discountType == 'none' && request.resource.data.discountValue == 0)
+          || (request.resource.data.discountType == 'percent' && request.resource.data.discountValue <= 100)
+          || (request.resource.data.discountType == 'fixed' && request.resource.data.discountValue <= request.resource.data.price)
+        );
+    }
+
+    // Furniture catalog: public reads, admin-only pricing updates.
+    match /products/{productId} {
+      allow read: if true;
+      allow create, delete: if false;
+      allow update: if isAdmin()
+        && request.resource.data.diff(resource.data).changedKeys().hasOnly([
+          'price',
+          'discountType',
+          'discountValue',
+        ])
+        && isValidPricingDocument();
+    }
+
+    // Users can access their own profile. Admins can manage roles.
+    match /users/{userId} {
+      allow read: if isAdmin() || (
+        isSignedIn()
+        && resource.data.email == request.auth.token.email
+      );
+
+      allow create: if isSignedIn()
+        && request.auth.uid == userId
+        && request.resource.data.role == 'user'
+        && request.resource.data.email == request.auth.token.email;
+
+      allow update: if isAdmin() || (
+        isSignedIn()
+        && request.auth.uid == userId
+        && request.resource.data.role == resource.data.role
+      );
+
+      allow delete: if false;
+    }
+  }
+}
+
+

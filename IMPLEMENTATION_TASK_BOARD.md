@@ -57,9 +57,9 @@
 **Depends on:** Phases 1-3
 
 ### Tasks
-- [ ] Add Firestore rules file in repo root: `firestore.rules` and wire it with `firebase.json`.
-- [ ] Allow public/authorized reads as intended, but restrict product price/discount writes to admin users only.
-- [ ] Align backend role logic with `src/features/auth/RequireRole.tsx` and user role source.
+- [x] Add Firestore rules file in repo root: `firestore.rules` and wire it with `firebase.json`.
+- [x] Allow public/authorized reads as intended, but restrict product price/discount writes to admin users only.
+- [x] Align backend role logic with `src/features/auth/RequireRole.tsx` and user role source.
 
 ### Acceptance criteria
 - [ ] Non-admin users cannot update product price/discount fields.
