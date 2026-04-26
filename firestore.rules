@@ -65,6 +65,22 @@ service cloud.firestore {
 
       allow delete: if false;
     }
+
+    // Favorites are user-owned documents keyed by product id.
+    match /users/{userId}/favorites/{productId} {
+      allow read: if isSignedIn() && request.auth.uid == userId;
+      allow create: if isSignedIn()
+        && request.auth.uid == userId
+        && request.resource.data.productId == productId;
+      allow delete: if isSignedIn() && request.auth.uid == userId;
+      allow update: if false;
+    }
+
+    // Preferences are stored under users/{uid}/preferences/default.
+    match /users/{userId}/preferences/{preferenceId} {
+      allow read, create, update: if isSignedIn() && request.auth.uid == userId;
+      allow delete: if false;
+    }
   }
 }
 

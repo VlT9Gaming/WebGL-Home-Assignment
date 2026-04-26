@@ -152,18 +152,24 @@ export function AdminPage() {
   }
 
   return (
-    <section className="page stack">
-      <h2>Admin pricing controls</h2>
-      <p>Update base price and discounts for existing products.</p>
+    <section className="page stack bg-gradient-to-b from-white to-slate-50">
+      <div className="section-hero">
+        <span className="stat-pill">Admin controls</span>
+        <h2 className="text-2xl font-semibold text-slate-900">Admin pricing controls</h2>
+        <p className="mt-1 text-slate-600">Update base price and discounts for existing products.</p>
+      </div>
 
       {loadError ? <p className="error-text">{loadError}</p> : null}
 
-      <form onSubmit={handleUpdatePricing} className="stack form-panel">
-        <h3>{isEditing ? `Edit pricing: ${selectedProduct?.name ?? ''}` : 'Select a product to edit pricing'}</h3>
+      <form onSubmit={handleUpdatePricing} className="stack form-panel border-slate-200 bg-white shadow-sm">
+        <h3 className="text-lg font-semibold text-slate-900">
+          {isEditing ? `Edit pricing: ${selectedProduct?.name ?? ''}` : 'Select a product to edit pricing'}
+        </h3>
 
-        <label>
+        <label className="text-sm font-medium text-slate-700">
           Base price
           <input
+            className="mt-1 bg-white"
             type="number"
             min={0}
             step="0.01"
@@ -174,18 +180,24 @@ export function AdminPage() {
           />
         </label>
 
-        <label>
+        <label className="text-sm font-medium text-slate-700">
           Discount type
-          <select value={form.discountType} onChange={onFieldChange('discountType')} disabled={!isEditing}>
+          <select
+            className="mt-1 rounded-lg border border-slate-300 bg-white px-3 py-2"
+            value={form.discountType}
+            onChange={onFieldChange('discountType')}
+            disabled={!isEditing}
+          >
             <option value="none">No discount</option>
             <option value="percent">Percent (%)</option>
             <option value="fixed">Fixed amount ($)</option>
           </select>
         </label>
 
-        <label>
+        <label className="text-sm font-medium text-slate-700">
           Discount value
           <input
+            className="mt-1 bg-white"
             type="number"
             min={0}
             step="0.01"
@@ -198,19 +210,28 @@ export function AdminPage() {
         {formError ? <p className="error-text">{formError}</p> : null}
         {notice ? <p className="hint">{notice}</p> : null}
 
-        <div className="row">
-          <button type="submit" disabled={submitting || !isEditing}>
+        <div className="row gap-2">
+          <button
+            type="submit"
+            className="btn-primary w-full sm:w-auto"
+            disabled={submitting || !isEditing}
+          >
             {submitting ? 'Saving...' : 'Save pricing'}
           </button>
           {isEditing ? (
-            <button type="button" className="ghost" onClick={resetForm} disabled={submitting}>
+            <button
+              type="button"
+              className="btn-secondary w-full sm:w-auto"
+              onClick={resetForm}
+              disabled={submitting}
+            >
               Cancel edit
             </button>
           ) : null}
         </div>
       </form>
 
-      <div className="table-wrap">
+      <div className="table-wrap hidden overflow-x-auto border-slate-200 bg-white shadow-sm md:block">
         <table>
           <thead>
             <tr>
@@ -230,7 +251,11 @@ export function AdminPage() {
                 <td>{formatPrice(getDiscountedPrice(product.price, product.discountType, product.discountValue))}</td>
                 <td>
                   <div className="row">
-                    <button type="button" className="ghost" onClick={() => handleEdit(product)}>
+                    <button
+                      type="button"
+                      className="btn-ghost"
+                      onClick={() => handleEdit(product)}
+                    >
                       Edit pricing
                     </button>
                   </div>
@@ -239,6 +264,38 @@ export function AdminPage() {
             ))}
           </tbody>
         </table>
+      </div>
+
+      <div className="grid gap-3 md:hidden">
+        {products.map((product) => {
+          const finalPrice = getDiscountedPrice(product.price, product.discountType, product.discountValue)
+          const isSelected = editingId === product.id
+
+          return (
+            <article
+              key={product.id}
+              className={`rounded-xl border bg-white p-4 shadow-sm ${
+                isSelected ? 'border-indigo-300 ring-2 ring-indigo-100' : 'border-slate-200'
+              }`}
+            >
+              <div className="space-y-2">
+                <h3 className="text-base font-semibold text-slate-900">{product.name}</h3>
+                <p className="text-sm text-slate-600">Base: {formatPrice(product.price)}</p>
+                <p className="text-sm text-slate-600">Discount: {getDiscountLabel(product.discountType, product.discountValue)}</p>
+                <p className="text-sm font-medium text-slate-800">Final: {formatPrice(finalPrice)}</p>
+              </div>
+              <div className="mt-3">
+                <button
+                  type="button"
+                  className="btn-ghost w-full"
+                  onClick={() => handleEdit(product)}
+                >
+                  {isSelected ? 'Editing this product' : 'Edit pricing'}
+                </button>
+              </div>
+            </article>
+          )
+        })}
       </div>
     </section>
   )

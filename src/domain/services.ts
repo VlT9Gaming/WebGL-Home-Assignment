@@ -1,4 +1,4 @@
-import type { AuthUser, Product, UserRole } from './types'
+import type { AuthUser, Product, UserPreferences, UserRole } from './types'
 
 export interface ProductService {
   listProducts(): Promise<Product[]>
@@ -14,5 +14,13 @@ export interface AuthService {
   register(email: string, password: string): Promise<AuthUser>
   setRole(email: string, role: UserRole): Promise<void>
   getCurrentUser(): Promise<AuthUser | null>
+}
+
+export interface PreferencesService {
+  listFavoriteProductIds(userId: string): Promise<string[]>
+  toggleFavorite(userId: string, productId: string): Promise<boolean>
+  isFavorite(userId: string, productId: string): Promise<boolean>
+  getPreferences(userId: string): Promise<UserPreferences>
+  updatePreferences(userId: string, updates: Partial<UserPreferences>): Promise<UserPreferences>
 }
 

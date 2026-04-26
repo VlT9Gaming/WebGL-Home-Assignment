@@ -7,6 +7,14 @@ export interface AuthUser {
   role: UserRole
 }
 
+export interface FavoriteItem {
+  productId: string
+}
+
+export interface UserPreferences {
+  viewerAutoRotate: boolean
+}
+
 export interface ProductCameraPresets {
   front: [number, number, number]
   side: [number, number, number]

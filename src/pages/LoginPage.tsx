@@ -42,22 +42,26 @@ export function LoginPage() {
 
   if (user) {
     return (
-      <section className="page stack narrow">
-        <h2>You are already signed in</h2>
-        <p>Head to catalog or admin tools using the top navigation.</p>
+      <section className="page stack narrow bg-white/90">
+        <h2 className="text-2xl font-semibold text-slate-900">You are already signed in</h2>
+        <p className="text-slate-600">Head to catalog or admin tools using the top navigation.</p>
       </section>
     )
   }
 
   return (
-    <section className="page stack narrow">
-      <h2>{mode === 'login' ? 'Sign in' : 'Create account'}</h2>
-      <p>Use your Firebase Authentication email and password.</p>
+    <section className="page stack narrow bg-gradient-to-b from-white to-slate-50 py-2">
+      <div className="section-hero">
+        <span className="stat-pill">Secure account access</span>
+        <h2 className="text-2xl font-semibold text-slate-900">{mode === 'login' ? 'Sign in' : 'Create account'}</h2>
+        <p className="mt-1 text-slate-600">Use your Firebase Authentication email and password.</p>
+      </div>
 
-      <form onSubmit={handleSubmit} className="stack form-panel">
-        <label>
+      <form onSubmit={handleSubmit} className="stack form-panel border-slate-200 bg-white shadow-sm">
+        <label className="text-sm font-medium text-slate-700">
           Email
           <input
+            className="mt-1 bg-white"
             type="email"
             value={email}
             onChange={(event) => setEmail(event.target.value)}
@@ -65,9 +69,10 @@ export function LoginPage() {
           />
         </label>
 
-        <label>
+        <label className="text-sm font-medium text-slate-700">
           Password
           <input
+            className="mt-1 bg-white"
             type="password"
             value={password}
             onChange={(event) => setPassword(event.target.value)}
@@ -78,13 +83,17 @@ export function LoginPage() {
 
         {error ? <p className="error-text">{error}</p> : null}
 
-        <div className="row">
-          <button type="submit" disabled={submitting}>
+        <div className="row gap-2">
+          <button
+            type="submit"
+            className="btn-primary w-full sm:w-auto"
+            disabled={submitting}
+          >
             {submitting ? 'Please wait...' : mode === 'login' ? 'Sign in' : 'Create account'}
           </button>
           <button
             type="button"
-            className="ghost"
+            className="btn-secondary w-full sm:w-auto"
             onClick={() => setMode((current) => (current === 'login' ? 'register' : 'login'))}
           >
             {mode === 'login' ? 'Need an account?' : 'Use existing account'}

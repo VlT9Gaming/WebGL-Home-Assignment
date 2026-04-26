@@ -1,11 +1,14 @@
 import { Html, OrbitControls, Stage, useGLTF } from '@react-three/drei'
 import { Canvas, useThree } from '@react-three/fiber'
 import { Component, Suspense, useEffect, useMemo, useState, type ReactNode } from 'react'
+import * as THREE from 'three'
 import type { Product } from '../../domain/types'
 
 interface ProductViewerProps {
   product: Product
   cameraPosition: [number, number, number]
+  autoRotate?: boolean
+  onAutoRotateChange?: (enabled: boolean) => void
 }
 
 function PlaceholderFurniture() {
@@ -42,14 +45,20 @@ function ModelLoadingState() {
   )
 }
 
-function CameraSync({ cameraPosition }: { cameraPosition: [number, number, number] }) {
+function CameraSync({
+  cameraPosition,
+  resetSignal,
+}: {
+  cameraPosition: [number, number, number]
+  resetSignal: number
+}) {
   const { camera } = useThree()
 
   useEffect(() => {
     camera.position.set(cameraPosition[0], cameraPosition[1], cameraPosition[2])
     camera.lookAt(0, 0.5, 0)
     camera.updateProjectionMatrix()
-  }, [camera, cameraPosition])
+  }, [camera, cameraPosition, resetSignal])
 
   return null
 }
@@ -108,13 +117,19 @@ const toLoadErrorMessage = (error: unknown): string => {
   return 'Unable to load this 3D model.'
 }
 
-export function ProductViewer({ product, cameraPosition }: ProductViewerProps) {
+export function ProductViewer({ product, cameraPosition, autoRotate = false, onAutoRotateChange }: ProductViewerProps) {
   const modelUrl = product.modelUrl?.trim() ?? ''
   const hasModelUrl = Boolean(modelUrl)
   const modelIdentity = `${product.id}:${modelUrl}`
   const [retryNonce, setRetryNonce] = useState(0)
+  const [cameraResetNonce, setCameraResetNonce] = useState(0)
+  const [autoRotateEnabled, setAutoRotateEnabled] = useState(autoRotate)
   const [failedModel, setFailedModel] = useState<{ identity: string; message: string } | null>(null)
   const hasModelError = failedModel?.identity === modelIdentity
+
+  useEffect(() => {
+    setAutoRotateEnabled(autoRotate)
+  }, [autoRotate])
 
   const handleModelError = (error: unknown) => {
     const message = toLoadErrorMessage(error)
@@ -131,6 +146,16 @@ export function ProductViewer({ product, cameraPosition }: ProductViewerProps) {
     setRetryNonce((value) => value + 1)
   }
 
+  const toggleAutoRotate = () => {
+    const next = !autoRotateEnabled
+    setAutoRotateEnabled(next)
+    onAutoRotateChange?.(next)
+  }
+
+  const resetCamera = () => {
+    setCameraResetNonce((value) => value + 1)
+  }
+
   const hintText = useMemo(() => {
     if (hasModelError) {
       const message = failedModel?.message || 'Unable to load this 3D model.'
@@ -145,10 +170,17 @@ export function ProductViewer({ product, cameraPosition }: ProductViewerProps) {
 
   return (
     <div className="viewer">
-      <Canvas shadows camera={{ position: cameraPosition, fov: 42 }}>
+      <Canvas
+        shadows
+        camera={{ position: cameraPosition, fov: 42 }}
+        onCreated={({ gl }) => {
+          // Avoid deprecated shadow map fallback warning in recent Three.js versions.
+          gl.shadowMap.type = THREE.PCFShadowMap
+        }}
+      >
         <color attach="background" args={['#f8fafc']} />
         <ambientLight intensity={0.4} />
-        <CameraSync cameraPosition={cameraPosition} />
+        <CameraSync cameraPosition={cameraPosition} resetSignal={cameraResetNonce} />
         <Stage shadows={{ type: 'contact', opacity: 0.2, blur: 2.2 }} intensity={0.6} adjustCamera={false}>
           {hasModelUrl && !hasModelError ? (
             <ModelErrorBoundary onError={handleModelError} resetKey={`${modelIdentity}:${retryNonce}`}>
@@ -160,11 +192,26 @@ export function ProductViewer({ product, cameraPosition }: ProductViewerProps) {
             <PlaceholderFurniture />
           )}
         </Stage>
-        <OrbitControls enablePan enableZoom minDistance={2.2} maxDistance={9} />
+        <OrbitControls
+          enablePan
+          enableZoom
+          minDistance={2.2}
+          maxDistance={9}
+          autoRotate={autoRotateEnabled}
+          autoRotateSpeed={1.1}
+        />
       </Canvas>
       <p className={hasModelError ? 'error-text' : 'hint'}>{hintText}</p>
+      <div className="row gap-2">
+        <button type="button" className={autoRotateEnabled ? 'btn-primary' : 'btn-ghost'} onClick={toggleAutoRotate}>
+          {autoRotateEnabled ? 'Stop auto-rotate' : 'Auto-rotate'}
+        </button>
+        <button type="button" className="btn-ghost" onClick={resetCamera}>
+          Reset camera
+        </button>
+      </div>
       {hasModelError ? (
-        <button type="button" className="ghost" onClick={retryModelLoad}>
+        <button type="button" className="btn-secondary" onClick={retryModelLoad}>
           Retry model load
         </button>
       ) : null}

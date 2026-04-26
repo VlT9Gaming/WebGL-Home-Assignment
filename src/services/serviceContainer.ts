@@ -1,12 +1,14 @@
-import type { AuthService, ProductService } from '../domain/services'
+import type { AuthService, PreferencesService, ProductService } from '../domain/services'
 import { firebaseAuth, firestoreDb } from '../firebase-config'
 import { FirebaseAuthService } from './firebase/firebaseAuthService'
+import { FirebasePreferencesService } from './firebase/firebasePreferencesService'
 import { FirebaseProductService } from './firebase/firebaseProductService'
 
-const createServices = (): { auth: AuthService; products: ProductService } => {
+const createServices = (): { auth: AuthService; products: ProductService; preferences: PreferencesService } => {
   return {
     auth: new FirebaseAuthService(firebaseAuth, firestoreDb),
     products: new FirebaseProductService(firestoreDb),
+    preferences: new FirebasePreferencesService(firestoreDb),
   }
 }
 
@@ -14,5 +16,6 @@ const createServices = (): { auth: AuthService; products: ProductService } => {
 export const services: {
   auth: AuthService
   products: ProductService
+  preferences: PreferencesService
 } = createServices()
 

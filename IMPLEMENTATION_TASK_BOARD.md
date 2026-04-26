@@ -72,10 +72,10 @@
 **Depends on:** Phases 1-4
 
 ### Tasks
-- [ ] Improve small-screen layout in `src/index.css` for header, grid, table, and viewer canvas.
-- [ ] Improve admin table mobile usability in `src/pages/AdminPage.tsx`.
-- [ ] Optimize product action button layout in `src/pages/ProductPage.tsx`.
-- [ ] Decide on styling strategy: hybrid CSS + Tailwind or fuller Tailwind migration.
+- [x] Improve small-screen layout in `src/index.css` for header, grid, table, and viewer canvas.
+- [x] Improve admin table mobile usability in `src/pages/AdminPage.tsx`.
+- [x] Optimize product action button layout in `src/pages/ProductPage.tsx`.
+- [x] Decide on styling strategy: hybrid CSS + Tailwind or fuller Tailwind migration. (Chosen: hybrid CSS + Tailwind)
 
 ### Acceptance criteria
 - [ ] No major overflow/cutoff issues on common mobile widths.
@@ -88,13 +88,13 @@
 **Depends on:** Phases 1-5
 
 ### Tasks
-- [ ] Add favorites/preferences data model to `src/domain/types.ts` and service methods in `src/domain/services.ts`.
-- [ ] Add saved-item UI in `src/pages/CatalogPage.tsx` and/or `src/pages/ProductPage.tsx`.
-- [ ] Add optional viewer enhancements (auto-rotate toggle, reset camera).
+- [x] Add favorites/preferences data model to `src/domain/types.ts` and service methods in `src/domain/services.ts`.
+- [x] Add saved-item UI in `src/pages/CatalogPage.tsx` and/or `src/pages/ProductPage.tsx`.
+- [x] Add optional viewer enhancements (auto-rotate toggle, reset camera).
 
 ### Acceptance criteria
-- [ ] Signed-in users can save and view favorites.
-- [ ] Optional viewer controls do not regress core interactions.
+- [x] Signed-in users can save and view favorites.
+- [x] Optional viewer controls do not regress core interactions.
 
 ---
 

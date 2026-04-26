@@ -4,9 +4,12 @@ import heroImage from '../../assets/hero.png'
 
 interface ProductCardProps {
   product: Product
+  isFavorite?: boolean
+  onToggleFavorite?: () => void
+  favoriteBusy?: boolean
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, isFavorite = false, onToggleFavorite, favoriteBusy = false }: ProductCardProps) {
   const imageSrc = product.imageUrl.trim() || heroImage
   const discountedPrice =
     product.discountType === 'percent'
@@ -17,29 +20,53 @@ export function ProductCard({ product }: ProductCardProps) {
   const hasDiscount = product.discountType !== 'none' && product.discountValue > 0
 
   return (
-    <article className="card">
-      <img src={imageSrc} alt={product.name} />
+    <article className="card border-slate-200/90 bg-white/95 shadow-sm">
+      <img className="ring-1 ring-slate-200" src={imageSrc} alt={product.name} />
       <div className="stack">
-        <h3>{product.name}</h3>
-        <p>{product.description}</p>
-        <p>
+        <div className="space-y-1">
+          <div className="row split gap-2">
+            <h3 className="text-lg font-semibold text-slate-900">{product.name}</h3>
+            {hasDiscount ? <span className="stat-pill">{product.discountType === 'percent' ? `${product.discountValue}% off` : 'Discount'}</span> : null}
+          </div>
+          <p className="line-clamp-2 text-sm text-slate-600">{product.description}</p>
+          {isFavorite ? <p className="text-xs font-medium text-indigo-600">Saved in favorites</p> : null}
+        </div>
+        <p className="text-sm text-slate-700">
           {hasDiscount ? (
             <>
-              <strong>${discountedPrice.toLocaleString()}</strong>{' '}
+              <strong className="text-base text-slate-900">${discountedPrice.toLocaleString()}</strong>{' '}
               <span className="hint">(was ${product.price.toLocaleString()})</span>
             </>
           ) : (
-            <strong>${product.price.toLocaleString()}</strong>
+            <strong className="text-base text-slate-900">${product.price.toLocaleString()}</strong>
           )}
         </p>
       </div>
-      <div className="row">
-        <Link to={`/catalog/${product.id}`} className="button-link">
+      <div className="row gap-2">
+        <Link
+          to={`/catalog/${product.id}`}
+          className="button-link btn-primary"
+        >
           Open 3D preview
         </Link>
-        <a href={product.purchaseUrl} target="_blank" rel="noreferrer" className="button-link ghost">
+        <a
+          href={product.purchaseUrl}
+          target="_blank"
+          rel="noreferrer"
+          className="button-link btn-secondary"
+        >
           Buy on store
         </a>
+        {onToggleFavorite ? (
+          <button
+            type="button"
+            className="btn-ghost"
+            onClick={onToggleFavorite}
+            disabled={favoriteBusy}
+          >
+            {favoriteBusy ? 'Saving...' : isFavorite ? 'Unsave' : 'Save'}
+          </button>
+        ) : null}
       </div>
     </article>
   )
