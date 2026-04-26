@@ -50,7 +50,7 @@ export function LoginPage() {
   }
 
   return (
-    <section className="page stack narrow bg-gradient-to-b from-white to-slate-50 py-2">
+    <section className="page stack narrow bg-linear-to-b from-white to-slate-50 py-2">
       <div className="section-hero">
         <span className="stat-pill">Secure account access</span>
         <h2 className="text-2xl font-semibold text-slate-900">{mode === 'login' ? 'Sign in' : 'Create account'}</h2>

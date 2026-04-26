@@ -21,7 +21,7 @@ export function ProductCard({ product, isFavorite = false, onToggleFavorite, fav
 
   return (
     <article className="card border-slate-200/90 bg-white/95 shadow-sm">
-      <img className="ring-1 ring-slate-200" src={imageSrc} alt={product.name} />
+      <img src={imageSrc} alt={product.name} />
       <div className="stack">
         <div className="space-y-1">
           <div className="row split gap-2">
