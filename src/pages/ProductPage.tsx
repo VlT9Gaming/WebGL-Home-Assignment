@@ -98,7 +98,7 @@ export function ProductPage() {
   const hasDiscount = product.discountType !== 'none' && product.discountValue > 0
 
   return (
-    <section className="page stack bg-gradient-to-b from-white to-slate-50">
+    <section className="page stack bg-linear-to-b from-white to-slate-50">
       <div className="section-hero">
         <span className="stat-pill">Interactive 3D product preview</span>
         <div className="row split gap-4 rounded-xl border border-slate-200 bg-white/90 p-4 shadow-sm">
