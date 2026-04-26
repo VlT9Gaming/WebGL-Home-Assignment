@@ -57,7 +57,7 @@ export function CatalogPage() {
   }
 
   return (
-    <section className="page stack bg-gradient-to-b from-white to-slate-50">
+    <section className="page stack bg-linear-to-b from-white to-slate-50">
       <div className="section-hero">
         <div className="row split gap-3">
           <h2 className="text-2xl font-semibold text-slate-900">Catalog</h2>

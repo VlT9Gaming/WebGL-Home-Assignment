@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import type { ChangeEvent, FormEvent } from 'react'
+import type { ChangeEvent } from 'react'
 import type { DiscountType, Product } from '../domain/types'
 import { services } from '../services/serviceContainer'
 
@@ -98,8 +98,7 @@ export function AdminPage() {
     setFormError(null)
   }
 
-  const handleUpdatePricing = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+  const handleUpdatePricing = async (_: FormData) => {
     setNotice(null)
 
     if (!editingId) {
@@ -152,7 +151,7 @@ export function AdminPage() {
   }
 
   return (
-    <section className="page stack bg-gradient-to-b from-white to-slate-50">
+    <section className="page stack bg-linear-to-b from-white to-slate-50">
       <div className="section-hero">
         <span className="stat-pill">Admin controls</span>
         <h2 className="text-2xl font-semibold text-slate-900">Admin pricing controls</h2>
@@ -161,7 +160,7 @@ export function AdminPage() {
 
       {loadError ? <p className="error-text">{loadError}</p> : null}
 
-      <form onSubmit={handleUpdatePricing} className="stack form-panel border-slate-200 bg-white shadow-sm">
+      <form action={handleUpdatePricing} className="stack form-panel border-slate-200 bg-white shadow-sm">
         <h3 className="text-lg font-semibold text-slate-900">
           {isEditing ? `Edit pricing: ${selectedProduct?.name ?? ''}` : 'Select a product to edit pricing'}
         </h3>
