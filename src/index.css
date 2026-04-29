@@ -68,6 +68,7 @@ a {
   border: 1px solid var(--border);
   border-radius: 18px;
   box-shadow: var(--shadow-sm);
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
 
