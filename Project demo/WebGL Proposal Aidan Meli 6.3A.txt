@@ -1,0 +1,58 @@
+3D Furniture Preview Web Application ? Proposal
+1. Client Scenario / Problem
+A furniture retail company wants to improve the online shopping experience by allowing customers to better visualise products before purchasing. Currently, customers can only view static images, which limits their ability to understand the design, scale, and details of the furniture.
+To solve this, the client requires a 3D web application where users can interact with furniture models in real time, explore them from different angles, and gain a more immersive understanding of the product. The application will also redirect users to the main e-commerce website to complete purchases.
+2. Target Audience
+* Online furniture shoppers
+* Interior designers 
+* Customers prefering visual/interactive product previews
+3. Functional Requirements
+* User authentication (login/register)
+* Browse a list of available furniture items
+* Select and load a 3D model of a furniture product
+* Interact with the model (rotate, zoom, inspect)
+* Redirect to the main website purchase page
+* Admin users can add, edit, or delete furniture items
+* Responsive design for mobile and desktop
+4. 3D Features to be Implemented
+* Real-time rendering of furniture models using React Three Fiber
+* Lighting and shadows for realistic presentation
+* Camera controls (orbit, zoom, pan)
+* Smooth animations (e.g. auto-rotation or user-triggered rotation)
+* Multiple viewpoints (e.g. front, side, top view)
+* Texture and material application for realism
+
+
+5. Data to be Stored in Firestore
+* Furniture items:
+o Name
+o Description
+o Price
+o 3D model file URL (GLTF/GLB)
+o Image preview
+o Purchase link (redirect URL)
+* User data:
+o Email
+o Role (Admin/User)
+* Optional:
+o User preferences or saved items
+6. Authentication & Role-Based Access Plan
+Firebase Authentication will be used with email and password login.
+* Users:
+o Can view furniture and interact with 3D models
+o Can access product links
+* Admin:
+o Can create, update, and delete furniture entries
+o Manage product data in Firestore
+Firestore security rules will ensure only authorised users can modify data.
+7. Technologies Used
+* React (Frontend framework)
+* Vite (Build tool)
+* React Three Fiber + Drei (3D rendering)
+* Firebase Authentication (User management)
+* Firestore Database (Data storage)
+* Firebase Storage (3D models & images)
+* React Router (Navigation)
+* Tailwind CSS (Responsive UI styling)
+8. Hosting Platform
+The application will be deployed using Firebase Hosting, Vercel, or GitHub Pages 
