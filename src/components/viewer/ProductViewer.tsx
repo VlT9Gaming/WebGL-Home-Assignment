@@ -170,6 +170,7 @@ export function ProductViewer({ product, cameraPosition, autoRotate = false, onA
 
   return (
     <div className="viewer">
+      <Suspense fallback={<div className="viewer-loading viewer-status">Loading 3D viewer...</div>}>
       <Canvas
         shadows
         camera={{ position: cameraPosition, fov: 42 }}
@@ -201,6 +202,7 @@ export function ProductViewer({ product, cameraPosition, autoRotate = false, onA
           autoRotateSpeed={1.1}
         />
       </Canvas>
+      </Suspense>
       <p className={hasModelError ? 'error-text' : 'hint'}>{hintText}</p>
       <div className="row gap-2">
         <button type="button" className={autoRotateEnabled ? 'btn-primary' : 'btn-ghost'} onClick={toggleAutoRotate}>

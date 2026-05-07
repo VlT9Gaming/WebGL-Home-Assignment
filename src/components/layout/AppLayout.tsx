@@ -13,7 +13,7 @@ export function AppLayout() {
           <p className="eyebrow text-indigo-600">3D Furniture Preview</p>
           <span className="stat-pill mt-2">Immersive catalog experience</span>
           <h1 className="title text-slate-900">Visualise before you buy</h1>
-          <p className="mt-1 text-sm text-slate-600">Interactive catalog, role-based admin pricing, and Firebase-ready architecture.</p>
+          <p className="mt-1 text-sm text-slate-600">Interactive catalogue.</p>
         </div>
 
         <nav className="nav relative">

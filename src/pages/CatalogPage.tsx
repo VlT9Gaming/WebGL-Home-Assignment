@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { ProductCard } from '../components/catalog/ProductCard'
+import { FavoritesDrawer } from '../components/catalog/FavoritesDrawer'
 import type { Product } from '../domain/types'
 import { useAuth } from '../features/auth/AuthContext'
 import { services } from '../services/serviceContainer'
@@ -10,7 +11,7 @@ export function CatalogPage() {
   const [loading, setLoading] = useState(true)
   const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set())
   const [favoriteBusyId, setFavoriteBusyId] = useState<string | null>(null)
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
+  const [drawerOpen, setDrawerOpen] = useState(false)
 
   useEffect(() => {
     services.products
@@ -32,9 +33,7 @@ export function CatalogPage() {
   }, [user])
 
   const handleToggleFavorite = async (productId: string) => {
-    if (!user) {
-      return
-    }
+    if (!user) return
 
     setFavoriteBusyId(productId)
     try {
@@ -57,40 +56,36 @@ export function CatalogPage() {
     return <p className="state">Loading furniture catalog...</p>
   }
 
-  const displayedProducts = showFavoritesOnly
-    ? products.filter((p) => favoriteIds.has(p.id))
-    : products
-
   return (
-    <section className="page stack bg-linear-to-b from-white to-slate-50">
-      <div className="section-hero">
-        <div className="row split gap-3">
-          <h2 className="text-2xl font-semibold text-slate-900">Catalog</h2>
-          <div className="row gap-2">
-            {user ? (
-              <button
-                type="button"
-                onClick={() => setShowFavoritesOnly((v) => !v)}
-                className={`text-sm font-medium px-3 py-1.5 rounded-lg border transition ${
-                  showFavoritesOnly
-                    ? 'bg-indigo-600 text-white border-indigo-600 hover:bg-indigo-700'
-                    : 'bg-white/80 text-slate-700 border-slate-200 hover:bg-slate-100'
-                }`}
-              >
-                {showFavoritesOnly ? '★ Favorites' : '☆ Favorites'}
-              </button>
-            ) : null}
-            <span className="stat-pill">{displayedProducts.length} items</span>
+    <>
+      <section className="page stack bg-linear-to-b from-white to-slate-50">
+        <div className="section-hero">
+          <div className="row split gap-3">
+            <h2 className="text-2xl font-semibold text-slate-900">Catalog</h2>
+            <div className="row gap-2">
+              {user ? (
+                <button
+                  type="button"
+                  onClick={() => setDrawerOpen(true)}
+                  className="fav-open-btn"
+                >
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill={favoriteIds.size > 0 ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+                  </svg>
+                  Saved
+                  {favoriteIds.size > 0 && (
+                    <span className="fav-badge">{favoriteIds.size}</span>
+                  )}
+                </button>
+              ) : null}
+              <span className="stat-pill">{products.length} items</span>
+            </div>
           </div>
+          <p className="mt-1 text-slate-600">Browse available furniture items and open a live 3D preview.</p>
+          {user ? <p className="mt-1 text-sm text-indigo-700">Signed in: save items to your favorites list.</p> : null}
         </div>
-        <p className="mt-1 text-slate-600">Browse available furniture items and open a live 3D preview.</p>
-        {user ? <p className="mt-1 text-sm text-indigo-700">Signed in: save items to your favorites list.</p> : null}
-      </div>
-      <div className="catalog-grid">
-        {displayedProducts.length === 0 && showFavoritesOnly ? (
-          <p className="text-slate-500 text-sm col-span-full">No favorites saved yet. Browse the catalog and save items.</p>
-        ) : (
-          displayedProducts.map((product) => (
+        <div className="catalog-grid">
+          {products.map((product) => (
             <ProductCard
               key={product.id}
               product={product}
@@ -98,10 +93,20 @@ export function CatalogPage() {
               onToggleFavorite={user ? () => void handleToggleFavorite(product.id) : undefined}
               favoriteBusy={favoriteBusyId === product.id}
             />
-          ))
-        )}
-      </div>
-    </section>
+          ))}
+        </div>
+      </section>
+
+      {user && (
+        <FavoritesDrawer
+          open={drawerOpen}
+          onClose={() => setDrawerOpen(false)}
+          products={products}
+          favoriteIds={favoriteIds}
+          onToggleFavorite={(id) => void handleToggleFavorite(id)}
+          busyId={favoriteBusyId}
+        />
+      )}
+    </>
   )
 }
-

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import type { FormEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../features/auth/AuthContext'
 
@@ -21,7 +20,7 @@ export function LoginPage() {
 
   const destination = state?.from ?? '/'
 
-  const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: { preventDefault(): void }) => {
     event.preventDefault()
     setSubmitting(true)
     setError(null)
@@ -54,7 +53,7 @@ export function LoginPage() {
       <div className="section-hero">
         <span className="stat-pill">Secure account access</span>
         <h2 className="text-2xl font-semibold text-slate-900">{mode === 'login' ? 'Sign in' : 'Create account'}</h2>
-        <p className="mt-1 text-slate-600">Use your Firebase Authentication email and password.</p>
+        <p className="mt-1 text-slate-600">Use your email and password to access your account.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="stack form-panel border-slate-200 bg-white shadow-sm">
