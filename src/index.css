@@ -642,6 +642,18 @@ tbody tr:nth-child(even) {
   cursor: not-allowed;
 }
 
+/* ===== PAGE TRANSITIONS ===== */
+
+.page-transition-wrap {
+  opacity: 0;
+  transform: translateY(16px);
+  will-change: opacity, transform;
+}
+
+.page-transition-wrap.page--in {
+  animation: fadeInUp 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
 /* ===== HOME PAGE ===== */
 
 @keyframes fadeInUp {

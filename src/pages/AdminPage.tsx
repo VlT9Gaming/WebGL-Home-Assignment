@@ -96,6 +96,7 @@ export function AdminPage() {
     setForm(emptyForm())
     setEditingId(null)
     setFormError(null)
+    setNotice(null)
   }
 
   const handleUpdatePricing = async (_: FormData) => {
@@ -138,6 +139,7 @@ export function AdminPage() {
 
   const handleEdit = (product: Product) => {
     setNotice(null)
+    setFormError(null)
     setEditingId(product.id)
     setForm({
       price: product.price,

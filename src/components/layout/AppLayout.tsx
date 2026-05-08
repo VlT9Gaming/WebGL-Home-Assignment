@@ -1,5 +1,28 @@
-import { NavLink, Outlet } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { NavLink, Outlet, useLocation } from 'react-router-dom'
 import { useAuth } from '../../features/auth/AuthContext'
+
+function AnimatedPage({ children }: { children: React.ReactNode }) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setMounted(true))
+    return () => cancelAnimationFrame(id)
+  }, [])
+  return (
+    <div className={`page-transition-wrap${mounted ? ' page--in' : ''}`}>
+      {children}
+    </div>
+  )
+}
+
+function PageTransitionOutlet() {
+  const location = useLocation()
+  return (
+    <AnimatedPage key={location.key}>
+      <Outlet />
+    </AnimatedPage>
+  )
+}
 
 export function AppLayout() {
   const { user, signOut } = useAuth()
@@ -13,7 +36,7 @@ export function AppLayout() {
           <p className="eyebrow text-indigo-600">3D Furniture Preview</p>
           <span className="stat-pill mt-2">Immersive catalog experience</span>
           <h1 className="title text-slate-900">Visualise before you buy</h1>
-          <p className="mt-1 text-sm text-slate-600">Interactive catalogue.</p>
+          <p className="mt-1 text-sm text-slate-600">Interactive furniture catalogue.</p>
         </div>
 
         <nav className="nav relative">
@@ -84,7 +107,7 @@ export function AppLayout() {
       </header>
 
       <main className="page-wrap">
-        <Outlet />
+        <PageTransitionOutlet />
       </main>
     </div>
   )
