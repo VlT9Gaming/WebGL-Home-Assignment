@@ -103,7 +103,7 @@ export function HomePage() {
           <div className="home-trust">
             <span>✓ All in browser</span>
             <span>✓ Free shipping to all malta</span>
-            <span>✓ Free to browse</span>
+            <span>✓ Free returns</span>
           </div>
         </div>
       </div> 
